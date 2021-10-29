@@ -4,13 +4,17 @@ import { Args, Query, Resolver } from '@nestjs/graphql';
 import { TodoItemDTO } from './todo-item.dto';
 import { TodoItemEntity } from './todo-item.entity';
 import { TodoItemConnection, TodoItemQuery } from './type';
+import { TodoItemService } from './todo-item.service';
 
 @Resolver(() => TodoItemDTO)
 export class TodoItemResolver {
   constructor(
     @InjectQueryService(TodoItemEntity)
-    readonly service: QueryService<TodoItemEntity>,
+    readonly service: TodoItemService,
   ) {}
+
+  // use custom service ⬆️
+  // readonly service: QueryService<TodoItemEntity>,
 
   // Set the return type to the TodoItemConnection
   @Query(() => TodoItemConnection)
@@ -23,6 +27,7 @@ export class TodoItemResolver {
       ...{ completed: { is: true } },
     };
 
+    this.service.markAllAsCompleted();
     return TodoItemConnection.createFromPromise((q) => this.service.query(q), {
       ...query,
       ...{ filter },
